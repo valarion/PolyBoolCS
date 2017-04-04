@@ -30,4 +30,4 @@ unit tests, but those are restricted to verifying that the output exactly matche
 polybooljs when using the polybooljs demo data as input, and does not attempt to verify correctness 
 any further than that. This port was done as an intellectual exercise rather than for actual production
 usage, and it is unlikely that there will be any further development or bugfixes other than perhaps 
-incorporating future bug fixed from polybooljs as time permits (if any should be posted).
+incorporating future bug fixes from polybooljs as time permits (if any should be posted).
