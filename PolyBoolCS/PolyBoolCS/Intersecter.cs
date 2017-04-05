@@ -2,6 +2,7 @@
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
 
+
 namespace PolyBoolCS
 {
 	using System;
@@ -217,6 +218,12 @@ namespace PolyBoolCS
 			if( !selfIntersection )
 			{
 				throw new Exception( "The addRegion() function is only intended for use when selfIntersection = false" );
+			}
+
+			// Ensure that the polygon is fully closed (the start point and end point are exactly the same)
+			if( !Epsilon.pointsSame( region[ region.Count - 1 ], region[ 0 ] ) )
+			{
+				region.Add( region[ 0 ] );
 			}
 
 			// regions are a list of points:
