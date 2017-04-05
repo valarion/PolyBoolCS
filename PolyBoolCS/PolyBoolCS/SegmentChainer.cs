@@ -1,6 +1,7 @@
-// PolyBoolCS is a C# port of the polybooljs library
+﻿// PolyBoolCS is a C# port of the polybooljs library
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
+
 
 namespace PolyBoolCS
 {

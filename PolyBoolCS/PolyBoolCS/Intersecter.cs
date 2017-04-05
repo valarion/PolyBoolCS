@@ -1,4 +1,4 @@
-// PolyBoolCS is a C# port of the polybooljs library
+﻿// PolyBoolCS is a C# port of the polybooljs library
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
 
@@ -67,45 +67,9 @@ namespace PolyBoolCS
 
 		#region Event logic
 
-		public int eventCompare( bool p1_isStart, Point p1_1, Point p1_2, bool p2_isStart, Point p2_1, Point p2_2 )
-		{
-			// compare the selected points first
-			var comp = Epsilon.pointsCompare( p1_1, p2_1 );
-			if( comp != 0 )
-				return comp;
-
-			// the selected points are the same
-
-			if( Epsilon.pointsSame( p1_2, p2_2 ) ) // if the non-selected points are the same too...
-				return 0; // then the segments are equal
-
-			if( p1_isStart != p2_isStart ) // if one is a start and the other isn't...
-				return p1_isStart ? 1 : -1; // favor the one that isn't the start
-
-			// otherwise, we'll have to calculate which one is below the other manually
-			return Epsilon.pointAboveOrOnLine(
-				p1_2,
-				p2_isStart ? p2_1 : p2_2, // order matters
-				p2_isStart ? p2_2 : p2_1
-			) ? 1 : -1;
-		}
-
 		public void eventAdd( EventNode ev, Point other_pt )
 		{
-			event_root.insertBefore( ev, ( here ) =>
-			{
-				// should ev be inserted before here?
-				var comp = eventCompare(
-					ev.isStart, 
-					ev.pt, 
-					other_pt,
-					here.isStart, 
-					here.pt,
-					here.other.pt
-				);
-
-				return comp < 0;
-			} );
+			event_root.insertBefore( ev, other_pt );
 		}
 
 		public EventNode eventAddSegmentStart( Segment seg, bool primary )
@@ -201,13 +165,13 @@ namespace PolyBoolCS
 			// segmentsX come from the self-intersection API, or this API
 			// invertedX is whether we treat that list of segments as an inverted polygon or not
 			// returns segments that can be used for further operations
-			foreach( var seg in segments1 )
+			for( int i = 0; i < segments1.Count; i++ )
 			{
-				eventAddSegment( seg, true );
+				eventAddSegment( segments1[ i ], true );
 			}
-			foreach( var seg in segments2 )
+			for( int i = 0; i < segments2.Count; i++ )
 			{
-				eventAddSegment( seg, false );
+				eventAddSegment( segments2[ i ], false );
 			}
 
 			return calculate_INTERNAL( inverted1, inverted2 );
@@ -251,31 +215,9 @@ namespace PolyBoolCS
 			}
 		}
 
-		private int statusCompare( EventNode ev1, EventNode ev2 )
-		{
-			var a1 = ev1.seg.start;
-			var a2 = ev1.seg.end;
-			var b1 = ev2.seg.start;
-			var b2 = ev2.seg.end;
-
-			if( Epsilon.pointsCollinear( a1, b1, b2 ) )
-			{
-				if( Epsilon.pointsCollinear( a2, b1, b2 ) )
-					return 1;//eventCompare(true, a1, a2, true, b1, b2);
-
-				return Epsilon.pointAboveOrOnLine( a2, b1, b2 ) ? 1 : -1;
-			}
-
-			return Epsilon.pointAboveOrOnLine( a1, b1, b2 ) ? 1 : -1;
-		}
-
 		private Transition statusFindSurrounding( EventNode ev )
 		{
-			return status_root.findTransition( ( here ) =>
-			{
-				var comp = statusCompare( ev, here.ev );
-				return comp > 0;
-			} );
+			return status_root.findTransition( ev );
 		}
 
 		private EventNode checkIntersection( EventNode ev1, EventNode ev2 )
@@ -424,7 +366,7 @@ namespace PolyBoolCS
 				var ev = (EventNode)event_root.head;
 
 				if( buildLog != null )
-					buildLog.vert( ev.pt[ 0 ] );
+					buildLog.vert( ev.pt.x );
 
 				if( ev.isStart )
 				{
@@ -532,9 +474,9 @@ namespace PolyBoolCS
 						// since now we know if we're filled below us, we can calculate whether
 						// we're filled above us by applying toggle to whatever is below us
 						if( toggle )
-							ev.seg.myFill.above = !ev.seg.myFill.below;
+							ev.seg.myFill.above = !ev.seg.myFill.below.Value;
 						else
-							ev.seg.myFill.above = ev.seg.myFill.below;
+							ev.seg.myFill.above = ev.seg.myFill.below.Value;
 					}
 					else
 					{
@@ -557,9 +499,9 @@ namespace PolyBoolCS
 								// otherwise, something is below us
 								// so copy the below segment's other polygon's above
 								if( ev.primary == below.primary )
-									inside = below.seg.otherFill.above.Value;
+									inside = below.seg.otherFill.above;
 								else
-									inside = below.seg.myFill.above.Value;
+									inside = below.seg.myFill.above;
 							}
 
 							ev.seg.otherFill = new SegmentFill()
@@ -580,7 +522,7 @@ namespace PolyBoolCS
 					}
 
 					// insert the status and remember it for later removal
-					ev.other.status = surrounding.insert( new StatusNode() { ev = ev } );
+					ev.other.status = status_root.insert( surrounding, ev );
 				}
 				else
 				{

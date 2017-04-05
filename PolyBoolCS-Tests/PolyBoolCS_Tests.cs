@@ -14,12 +14,29 @@ namespace PolyBoolCS_Tests
 	public class PolyBoolCS_Tests
 	{
 		[TestMethod]
+		public void ProfileThisFunction()
+		{
+			// This function exists primarily to allow me to run the VSTEST profiler on it, so that 
+			// I can determine where PolyBoolCS spends most of its time, and which areas can be 
+			// cleaned up if I ever decide to refactor it into a production-ready version.
+
+			var clipper = new PolyBool();
+			var demo = DemoData.polyCases.Where( x => x.name == "Two Triangles With Common Edge" ).First();
+
+			for( int i = 0; i < 1000; i++ )
+			{
+				var result = clipper.difference( demo.poly1, demo.poly2 );
+				Assert.IsNotNull( result );
+			}
+		}
+
+		[TestMethod]
 		public void DebugScratchpad()
 		{
 			var demo = DemoData.polyCases.Where( x => x.name == "Two Triangles With Common Edge" ).First();
 			var buildLog = new BuildLog();
-			var lib = new PolyBool() { BuildLog = buildLog };
-			var result = lib.intersect( demo.poly1, demo.poly2 );
+			var clipper = new PolyBool() { BuildLog = buildLog };
+			var result = clipper.intersect( demo.poly1, demo.poly2 );
 
 			var json = buildLog.ToJSON();
 			using( var file = File.CreateText( "DebugLog.json" ) )
@@ -112,8 +129,8 @@ namespace PolyBoolCS_Tests
 				var validationPoint = validationData[ i ];
 				var resultPoint = result[ i ];
 
-				Assert.AreEqual( validationPoint[ 0 ], resultPoint[ 0 ], 1e-9f, string.Format( "Demo: '{0}', Op: '{1}', Point: {2}", demoName, operation, i ) );
-				Assert.AreEqual( validationPoint[ 1 ], resultPoint[ 1 ], 1e-9f, string.Format( "Demo: '{0}', Op: '{1}', Point: {2}", demoName, operation, i ) );
+				Assert.AreEqual( validationPoint[ 0 ], resultPoint.x, 1e-9f, string.Format( "Demo: '{0}', Op: '{1}', Point: {2}", demoName, operation, i ) );
+				Assert.AreEqual( validationPoint[ 1 ], resultPoint.y, 1e-9f, string.Format( "Demo: '{0}', Op: '{1}', Point: {2}", demoName, operation, i ) );
 			}
 		}
 	}

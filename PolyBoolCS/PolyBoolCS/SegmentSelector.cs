@@ -1,6 +1,7 @@
-// PolyBoolCS is a C# port of the polybooljs library
+﻿// PolyBoolCS is a C# port of the polybooljs library
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
+
 
 namespace PolyBoolCS
 {
@@ -176,9 +177,9 @@ namespace PolyBoolCS
 			foreach( var seg in segments )
 			{
 				var index =
-					( seg.myFill.above.Value ? 8 : 0 ) +
+					( seg.myFill.above ? 8 : 0 ) +
 					( seg.myFill.below.Value ? 4 : 0 ) +
-					( ( seg.otherFill != null && seg.otherFill.above.Value ) ? 2 : 0 ) +
+					( ( seg.otherFill != null && seg.otherFill.above ) ? 2 : 0 ) +
 					( ( seg.otherFill != null && seg.otherFill.below.Value ) ? 1 : 0 );
 
 				if( selection[ index ] != 0 )

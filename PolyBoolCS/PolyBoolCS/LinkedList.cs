@@ -1,11 +1,76 @@
-// PolyBoolCS is a C# port of the polybooljs library
+﻿// PolyBoolCS is a C# port of the polybooljs library
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
+
 
 namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
+
+	public class EventNode
+	{
+		public bool isStart;
+		public Point pt;
+		public Segment seg;
+		public bool primary;
+		public EventNode other;
+		public StatusNode status;
+
+		#region Linked List Node
+
+		public EventNode next;
+		public EventNode prev;
+
+		public void remove()
+		{
+			prev.next = next;
+
+			if( next != null )
+			{
+				next.prev = prev;
+			}
+
+			prev = null;
+			next = null;
+		}
+
+		#endregion
+
+		#region Debugging support
+
+		public override string ToString()
+		{
+			return string.Format( "Start={0}, Point={1}, Segment={2}", isStart, pt, seg );
+		}
+
+		#endregion
+	}
+
+	public class StatusNode
+	{
+		public EventNode ev;
+
+		#region Linked List Node 
+
+		public StatusNode next;
+		public StatusNode prev;
+
+		public void remove()
+		{
+			prev.next = next;
+
+			if( next != null )
+			{
+				next.prev = prev;
+			}
+
+			prev = null;
+			next = null;
+		}
+
+		#endregion
+	}
 
 	public class StatusLinkedList
 	{
@@ -33,14 +98,14 @@ namespace PolyBoolCS
 			return true;
 		}
 
-		public Transition findTransition( Func<StatusNode, bool> predicate )
+		public Transition findTransition( EventNode ev )
 		{
 			var prev = root;
 			var here = root.next;
 
 			while( here != null )
 			{
-				if( predicate( here ) )
+				if( findTransitionPredicate( ev, here ) )
 					break;
 
 				prev = here;
@@ -49,25 +114,61 @@ namespace PolyBoolCS
 
 			return new Transition()
 			{
-				before = object.ReferenceEquals( prev, root ) ? null : prev.ev,
+				before = prev == root ? null : prev.ev,
 				after = here != null ? here.ev : null,
-				insert = ( node ) =>
-				{
-					node.prev = prev;
-					node.next = here;
-					prev.next = node;
-
-					if( here != null )
-					{
-						here.prev = node;
-					}
-
-					return node;
-				}
+				here = here,
+				prev = prev
 			};
 		}
 		
+		public StatusNode insert( Transition surrounding, EventNode ev )
+		{
+			var prev = surrounding.prev;
+			var here = surrounding.here;
+
+			var node = new StatusNode() { ev = ev };
+
+			node.prev = prev;
+			node.next = here;
+			prev.next = node;
+
+			if( here != null )
+			{
+				here.prev = node;
+			}
+
+			return node;
+		}
+
 		#endregion
+
+		#region Private utilty functions 
+
+		private bool findTransitionPredicate( EventNode ev, StatusNode here )
+		{
+			var comp = statusCompare( ev, here.ev );
+			return comp > 0;
+		}
+
+		private int statusCompare( EventNode ev1, EventNode ev2 )
+		{
+			var a1 = ev1.seg.start;
+			var a2 = ev1.seg.end;
+			var b1 = ev2.seg.start;
+			var b2 = ev2.seg.end;
+
+			if( Epsilon.pointsCollinear( a1, b1, b2 ) )
+			{
+				if( Epsilon.pointsCollinear( a2, b1, b2 ) )
+					return 1;//eventCompare(true, a1, a2, true, b1, b2);
+
+				return Epsilon.pointAboveOrOnLine( a2, b1, b2 ) ? 1 : -1;
+			}
+
+			return Epsilon.pointAboveOrOnLine( a1, b1, b2 ) ? 1 : -1;
+		}
+
+		#endregion 
 	}
 
 	public class EventLinkedList
@@ -88,14 +189,14 @@ namespace PolyBoolCS
 
 		#region Public functions
 
-		public void insertBefore( EventNode node, Func<EventNode, bool> predicate )
+		public void insertBefore( EventNode node, Point other_pt )
 		{
 			var last = root;
-			var here = (EventNode)root.next;
+			var here = root.next;
 
 			while( here != null )
 			{
-				if( predicate( here ) )
+				if( insertBeforePredicate( here, node, ref other_pt ) )
 				{
 					node.prev = here.prev;
 					node.next = here;
@@ -106,12 +207,54 @@ namespace PolyBoolCS
 				}
 
 				last = here;
-				here = (EventNode)here.next;
+				here = here.next;
 			}
 
 			last.next = node;
 			node.prev = last;
 			node.next = null;
+		}
+
+		#endregion 
+
+		#region Private utility functions 
+
+		private bool insertBeforePredicate( EventNode here, EventNode ev, ref Point other_pt )
+		{
+			// should ev be inserted before here?
+			var comp = eventCompare(
+				ev.isStart,
+				ref ev.pt,
+				ref other_pt,
+				here.isStart,
+				ref here.pt,
+				ref here.other.pt
+			);
+
+			return comp < 0;
+		}
+
+		private int eventCompare( bool p1_isStart, ref Point p1_1, ref Point p1_2, bool p2_isStart, ref Point p2_1, ref  Point p2_2 )
+		{
+			// compare the selected points first
+			var comp = Epsilon.pointsCompare( p1_1, p2_1 );
+			if( comp != 0 )
+				return comp;
+
+			// the selected points are the same
+
+			if( Epsilon.pointsSame( p1_2, p2_2 ) ) // if the non-selected points are the same too...
+				return 0; // then the segments are equal
+
+			if( p1_isStart != p2_isStart ) // if one is a start and the other isn't...
+				return p1_isStart ? 1 : -1; // favor the one that isn't the start
+
+			// otherwise, we'll have to calculate which one is below the other manually
+			return Epsilon.pointAboveOrOnLine(
+				p1_2,
+				p2_isStart ? p2_1 : p2_2, // order matters
+				p2_isStart ? p2_2 : p2_1
+			) ? 1 : -1;
 		}
 
 		#endregion

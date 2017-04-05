@@ -1,6 +1,7 @@
-// PolyBoolCS is a C# port of the polybooljs library
+﻿// PolyBoolCS is a C# port of the polybooljs library
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
+
 
 namespace PolyBoolCS
 {
@@ -23,12 +24,12 @@ namespace PolyBoolCS
 
 		public static bool pointAboveOrOnLine( Point pt, Point left, Point right )
 		{
-			var Ax = left[ 0 ];
-			var Ay = left[ 1 ];
-			var Bx = right[ 0 ];
-			var By = right[ 1 ];
-			var Cx = pt[ 0 ];
-			var Cy = pt[ 1 ];
+			var Ax = left.x;
+			var Ay = left.y;
+			var Bx = right.x;
+			var By = right.y;
+			var Cx = pt.x;
+			var Cy = pt.y;
 
 			return ( Bx - Ax ) * ( Cy - Ay ) - ( By - Ay ) * ( Cx - Ax ) >= -eps;
 		}
@@ -37,10 +38,10 @@ namespace PolyBoolCS
 		{
 			// p must be collinear with left->right
 			// returns false if p == left, p == right, or left == right
-			var d_py_ly = pt[ 1 ] - left[ 1 ];
-			var d_rx_lx = right[ 0 ] - left[ 0 ];
-			var d_px_lx = pt[ 0 ] - left[ 0 ];
-			var d_ry_ly = right[ 1 ] - left[ 1 ];
+			var d_py_ly = pt.y - left.y;
+			var d_rx_lx = right.x - left.x;
+			var d_px_lx = pt.x - left.x;
+			var d_ry_ly = right.y - left.y;
 
 			var dot = d_px_lx * d_rx_lx + d_py_ly * d_ry_ly;
 
@@ -61,28 +62,28 @@ namespace PolyBoolCS
 
 		public static bool pointsSameX( Point p1, Point p2 )
 		{
-			return Math.Abs( p1[ 0 ] - p2[ 0 ] ) < eps;
+			return Math.Abs( p1.x - p2.x ) < eps;
 		}
 
 		public static bool pointsSameY( Point p1, Point p2 )
 		{
-			return Math.Abs( p1[ 1 ] - p2[ 1 ] ) < eps;
+			return Math.Abs( p1.y - p2.y ) < eps;
 		}
 
 		public static bool pointsSame( Point p1, Point p2 )
 		{
 			return
-				Math.Abs( p1[ 0 ] - p2[ 0 ] ) < eps &&
-				Math.Abs( p1[ 1 ] - p2[ 1 ] ) < eps;
+				Math.Abs( p1.x - p2.x ) < eps &&
+				Math.Abs( p1.y - p2.y ) < eps;
 		}
 
 		public static int pointsCompare( Point p1, Point p2 )
 		{
 			// returns -1 if p1 is smaller, 1 if p2 is smaller, 0 if equal
 			if( pointsSameX( p1, p2 ) )
-				return pointsSameY( p1, p2 ) ? 0 : ( p1[ 1 ] < p2[ 1 ] ? -1 : 1 );
+				return pointsSameY( p1, p2 ) ? 0 : ( p1.y < p2.y ? -1 : 1 );
 
-			return p1[ 0 ] < p2[ 0 ] ? -1 : 1;
+			return p1.x < p2.x ? -1 : 1;
 		}
 
 		public static bool pointsCollinear( Point p1, Point p2, Point p3 )
@@ -90,10 +91,10 @@ namespace PolyBoolCS
 			// does pt1->pt2->pt3 make a straight line?
 			// essentially this is just checking to see if the slope(pt1->pt2) === slope(pt2->pt3)
 			// if slopes are equal, then they must be collinear, because they share pt2
-			var dx1 = p1[ 0 ] - p2[ 0 ];
-			var dy1 = p1[ 1 ] - p2[ 1 ];
-			var dx2 = p2[ 0 ] - p3[ 0 ];
-			var dy2 = p2[ 1 ] - p3[ 1 ];
+			var dx1 = p1.x - p2.x;
+			var dy1 = p1.y - p2.y;
+			var dx2 = p2.x - p3.x;
+			var dy2 = p2.y - p3.y;
 
 			return Math.Abs( dx1 * dy2 - dx2 * dy1 ) < eps;
 		}
@@ -119,10 +120,10 @@ namespace PolyBoolCS
 			//     1   intersection point is directly on segment's second point
 			//     2   intersection point is after segment's second point
 
-			var adx = a1[ 0 ] - a0[ 0 ];
-			var ady = a1[ 1 ] - a0[ 1 ];
-			var bdx = b1[ 0 ] - b0[ 0 ];
-			var bdy = b1[ 1 ] - b0[ 1 ];
+			var adx = a1.x - a0.x;
+			var ady = a1.y - a0.y;
+			var bdx = b1.x - b0.x;
+			var bdy = b1.y - b0.y;
 
 			var axb = adx * bdy - ady * bdx;
 			if( Math.Abs( axb ) < eps )
@@ -131,8 +132,8 @@ namespace PolyBoolCS
 				return false; // lines are coincident
 			}
 
-			var dx = a0[ 0 ] - b0[ 0 ];
-			var dy = a0[ 1 ] - b0[ 1 ];
+			var dx = a0.x - b0.x;
+			var dy = a0.y - b0.y;
 
 			var A = ( bdx * dy - bdy * dx ) / axb;
 			var B = ( adx * dy - ady * dx ) / axb;
@@ -143,8 +144,8 @@ namespace PolyBoolCS
 				alongB = 0,
 				pt = new Point()
 				{
-					x = a0[ 0 ] + A * adx,
-					y = a0[ 1 ] + A * ady
+					x = a0.x + A * adx,
+					y = a0.y + A * ady
 				}
 			};
 

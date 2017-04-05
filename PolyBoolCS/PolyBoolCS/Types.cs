@@ -1,75 +1,12 @@
-// PolyBoolCS is a C# port of the polybooljs library
+﻿// PolyBoolCS is a C# port of the polybooljs library
 // polybooljs is (c) Copyright 2016, Sean Connelly (@voidqk), http://syntheti.cc
 // MIT License
+
 
 namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
-
-	public class EventNode
-	{
-		public bool isStart;
-		public Point pt;
-		public Segment seg;
-		public bool primary;
-		public EventNode other;
-		public StatusNode status;
-
-		#region Debugging support 
-
-		public override string ToString()
-		{
-			return string.Format( "Start={0}, Point={1}, Segment={2}", isStart, pt, seg );
-		}
-
-		#endregion 
-	
-		#region Node Members
-
-		public EventNode next;
-		public EventNode prev;
-
-		public void remove()
-		{
-			prev.next = next;
-			
-			if( next != null )
-			{
-				next.prev = prev;
-			}
-
-			prev = null;
-			next = null;
-		}
-
-		#endregion
-	}
-
-	public class StatusNode
-	{
-		public EventNode ev;
-
-		#region Node Members
-
-		public StatusNode next;
-		public StatusNode prev;
-
-		public void remove()
-		{
-			prev.next = next;
-
-			if( next != null )
-			{
-				next.prev = prev;
-			}
-
-			prev = null;
-			next = null;
-		}
-
-		#endregion
-	}
 
 	public interface INode
 	{
@@ -79,12 +16,13 @@ namespace PolyBoolCS
 		void remove();
 	}
 
-	public class Transition
+	public struct Transition
 	{
 		public EventNode before;
 		public EventNode after;
 
-		public Func<StatusNode, StatusNode> insert;
+		public StatusNode prev;
+		public StatusNode here;
 	}
 
 	public class Segment
@@ -112,10 +50,11 @@ namespace PolyBoolCS
 
 	public class SegmentFill
 	{
-		// NOTE: This is kind of asinine, but the original javascript code tested below === null to determine that the edge had not 
-		// yet been processed, and standard true/false in every other case, necessitating the use of a nullable bool here.
+		// NOTE: This is kind of asinine, but the original javascript code used (below === null) to determine that the edge had not 
+		// yet been processed, and treated below as a standard true/false in every other case, necessitating the use of a nullable 
+		// bool here.
 
-		public bool? above;
+		public bool above;
 		public bool? below;
 
 		#region Debugging support
@@ -204,19 +143,6 @@ namespace PolyBoolCS
 		{
 			this.x = x;
 			this.y = y;
-		}
-
-		public double this[ int index ]
-		{
-			get
-			{
-				if( index == 0 )
-					return x;
-				else if( index == 1 )
-					return y;
-				else
-					throw new IndexOutOfRangeException();
-			}
 		}
 
 		#region Debugging support
