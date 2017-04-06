@@ -8,14 +8,6 @@ namespace PolyBoolCS
 	using System;
 	using System.Collections.Generic;
 
-	public interface INode
-	{
-		INode next { get; set; }
-		INode prev { get; set; }
-
-		void remove();
-	}
-
 	public struct Transition
 	{
 		public EventNode before;
