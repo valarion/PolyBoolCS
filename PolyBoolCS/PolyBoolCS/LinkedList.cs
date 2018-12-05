@@ -7,11 +7,12 @@ namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
+    using Microsoft.Xna.Framework;
 
-	public class EventNode
+    public class EventNode
 	{
 		public bool isStart;
-		public Point pt;
+		public Vector2 pt;
 		public Segment seg;
 		public bool primary;
 		public EventNode other;
@@ -189,7 +190,7 @@ namespace PolyBoolCS
 
 		#region Public functions
 
-		public void insertBefore( EventNode node, Point other_pt )
+		public void insertBefore( EventNode node, Vector2 other_pt )
 		{
 			var last = root;
 			var here = root.next;
@@ -219,7 +220,7 @@ namespace PolyBoolCS
 
 		#region Private utility functions 
 
-		private bool insertBeforePredicate( EventNode here, EventNode ev, ref Point other_pt )
+		private bool insertBeforePredicate( EventNode here, EventNode ev, ref Vector2 other_pt )
 		{
 			// should ev be inserted before here?
 			var comp = eventCompare(
@@ -234,7 +235,7 @@ namespace PolyBoolCS
 			return comp < 0;
 		}
 
-		private int eventCompare( bool p1_isStart, ref Point p1_1, ref Point p1_2, bool p2_isStart, ref Point p2_1, ref  Point p2_2 )
+		private int eventCompare( bool p1_isStart, ref Vector2 p1_1, ref Vector2 p1_2, bool p2_isStart, ref Vector2 p2_1, ref  Vector2 p2_2 )
 		{
 			// compare the selected points first
 			var comp = Epsilon.pointsCompare( p1_1, p2_1 );

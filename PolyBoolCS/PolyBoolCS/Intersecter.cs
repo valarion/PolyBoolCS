@@ -7,11 +7,12 @@ namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
+    using Microsoft.Xna.Framework;
 
-	/// <summary>
-	/// this is the core work-horse
-	/// </summary>
-	public class Intersecter
+    /// <summary>
+    /// this is the core work-horse
+    /// </summary>
+    public class Intersecter
 	{
 		#region Private fields
 
@@ -35,7 +36,7 @@ namespace PolyBoolCS
 
 		#region Segment creation
 
-		public Segment segmentNew( Point start, Point end )
+		public Segment segmentNew( Vector2 start, Vector2 end )
 		{
 			return new Segment()
 			{
@@ -47,7 +48,7 @@ namespace PolyBoolCS
 			};
 		}
 
-		public Segment segmentCopy( Point start, Point end, Segment seg )
+		public Segment segmentCopy( Vector2 start, Vector2 end, Segment seg )
 		{
 			return new Segment()
 			{
@@ -67,7 +68,7 @@ namespace PolyBoolCS
 
 		#region Event logic
 
-		public void eventAdd( EventNode ev, Point other_pt )
+		public void eventAdd( EventNode ev, Vector2 other_pt )
 		{
 			event_root.insertBefore( ev, other_pt );
 		}
@@ -116,7 +117,7 @@ namespace PolyBoolCS
 			return ev_start;
 		}
 
-		public void eventUpdateEnd( EventNode ev, Point end )
+		public void eventUpdateEnd( EventNode ev, Vector2 end )
 		{
 			// slides an end backwards
 			//   (start)------------(end)    to:
@@ -133,7 +134,7 @@ namespace PolyBoolCS
 			eventAdd( ev.other, ev.pt );
 		}
 
-		public EventNode eventDivide( EventNode ev, Point pt )
+		public EventNode eventDivide( EventNode ev, Vector2 pt )
 		{
 			var ns = segmentCopy( pt, ev.seg.end, ev.seg );
 			eventUpdateEnd( ev, pt );
@@ -177,7 +178,7 @@ namespace PolyBoolCS
 			return calculate_INTERNAL( inverted1, inverted2 );
 		}
 
-		public void addRegion( PointList region )
+		public void addRegion( List<Vector2> region )
 		{
 			if( !selfIntersection )
 			{
@@ -193,7 +194,7 @@ namespace PolyBoolCS
 			// regions are a list of points:
 			//  [ [0, 0], [100, 0], [50, 100] ]
 			// you can add multiple regions before running calculate
-			var pt1 = new Point();
+			var pt1 = new Vector2();
 			var pt2 = region[ region.Count - 1 ];
 
 			for( var i = 0; i < region.Count; i++ )
@@ -366,7 +367,7 @@ namespace PolyBoolCS
 				var ev = (EventNode)event_root.head;
 
 				if( buildLog != null )
-					buildLog.vert( ev.pt.x );
+					buildLog.vert( ev.pt.X );
 
 				if( ev.isStart )
 				{

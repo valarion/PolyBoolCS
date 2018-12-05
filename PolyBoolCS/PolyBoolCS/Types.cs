@@ -7,8 +7,9 @@ namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
+    using Microsoft.Xna.Framework;
 
-	public struct Transition
+    public struct Transition
 	{
 		public EventNode before;
 		public EventNode after;
@@ -20,8 +21,8 @@ namespace PolyBoolCS
 	public class Segment
 	{
 		public int id = -1;
-		public Point start;
-		public Point end;
+		public Vector2 start;
+		public Vector2 end;
 		public SegmentFill myFill;
 		public SegmentFill otherFill;
 
@@ -76,7 +77,7 @@ namespace PolyBoolCS
 		/// <summary>
 		/// where the intersection point is at
 		/// </summary>
-		public Point pt;
+		public Vector2 pt;
 
 		/// <summary>
 		/// where intersection point is along A
@@ -92,7 +93,7 @@ namespace PolyBoolCS
 	[System.Diagnostics.DebuggerTypeProxy( typeof( Polygon.PolygonDebugProxy ) )]
 	public class Polygon
 	{
-		public List<PointList> regions = null;
+		public List<List<Vector2>> regions = null;
 		public bool inverted = false;
 
 		#region Debugging support
@@ -104,14 +105,14 @@ namespace PolyBoolCS
 
 		public sealed class PolygonDebugProxy
 		{
-			private readonly ICollection<PointList> list;
+			private readonly ICollection<List<Vector2>> list;
 
 			[System.Diagnostics.DebuggerBrowsable( System.Diagnostics.DebuggerBrowsableState.RootHidden )]
-			public PointList[] Regions
+			public List<Vector2>[] Regions
 			{
 				get
 				{
-					var items = new PointList[ list.Count ];
+					var items = new List<Vector2>[ list.Count ];
 					list.CopyTo( items, 0 );
 					return items;
 				}
@@ -120,71 +121,6 @@ namespace PolyBoolCS
 			public PolygonDebugProxy( Polygon target )
 			{
 				this.list = target.regions;
-			}
-		}
-
-		#endregion
-	}
-
-	public struct Point
-	{
-		public double x;
-		public double y;
-
-		public Point( double x, double y )
-		{
-			this.x = x;
-			this.y = y;
-		}
-
-		#region Debugging support
-
-		public override string ToString()
-		{
-			return string.Format( "[{0:F3}, {1:F3}]", x, y );
-		}
-
-		#endregion 
-	}
-
-	[System.Diagnostics.DebuggerTypeProxy( typeof( PointList.PointListDebugProxy ) )]
-	public class PointList : List<Point>
-	{
-		public PointList()
-			: base()
-		{
-		}
-
-		public PointList( int capacity )
-			: base( capacity )
-		{
-		}
-
-		#region Debugging support
-
-		public override string ToString()
-		{
-			return string.Format( "Count={0}", this.Count );
-		}
-
-		public sealed class PointListDebugProxy
-		{
-			private readonly ICollection<Point> list;
-
-			[System.Diagnostics.DebuggerBrowsable( System.Diagnostics.DebuggerBrowsableState.RootHidden )]
-			public Point[] Points
-			{
-				get
-				{
-					var items = new Point[ list.Count ];
-					list.CopyTo( items, 0 );
-					return items;
-				}
-			}
-
-			public PointListDebugProxy( PointList target )
-			{
-				this.list = target;
 			}
 		}
 

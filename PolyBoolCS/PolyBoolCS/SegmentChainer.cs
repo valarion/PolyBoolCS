@@ -7,16 +7,17 @@ namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
+    using Microsoft.Xna.Framework;
 
-	/// <summary>
-	/// converts a list of segments into a list of regions, while also removing unnecessary vertices
-	/// </summary>
-	public class SegmentChainer
+    /// <summary>
+    /// converts a list of segments into a list of regions, while also removing unnecessary vertices
+    /// </summary>
+    public class SegmentChainer
 	{
 		#region Fields
 
-		private List<PointList> chains;
-		private List<PointList> regions;
+		private List<List<Vector2>> chains;
+		private List<List<Vector2>> regions;
 		private BuildLog buildLog;
 
 		private Match first_match;
@@ -27,11 +28,11 @@ namespace PolyBoolCS
 
 		#region Public functions
 
-		public List<PointList> chain( SegmentList segments, BuildLog buildLog = null )
+		public List<List<Vector2>> chain( SegmentList segments, BuildLog buildLog = null )
 		{
 			this.buildLog = buildLog;
-			this.chains = new List<PointList>();
-			this.regions = new List<PointList>();
+			this.chains = new List<List<Vector2>>();
+			this.regions = new List<List<Vector2>>();
 
 			foreach( var seg in segments )
 			{
@@ -98,7 +99,7 @@ namespace PolyBoolCS
 				if( next_match == first_match )
 				{
 					// we didn't match anything, so create a new chain
-					chains.Add( new PointList() { pt1, pt2 } );
+					chains.Add( new List<Vector2>() { pt1, pt2 } );
 
 					if( buildLog != null )
 					{

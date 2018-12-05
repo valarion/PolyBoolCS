@@ -7,41 +7,42 @@ namespace PolyBoolCS
 {
 	using System;
 	using System.Collections.Generic;
+    using Microsoft.Xna.Framework;
 
-	/// <summary>
-	/// Provides the raw computation functions that takes epsilon into account.
-	/// zero is defined to be between (-epsilon, epsilon) exclusive
-	/// </summary>
-	public class Epsilon
+    /// <summary>
+    /// Provides the raw computation functions that takes epsilon into account.
+    /// zero is defined to be between (-epsilon, epsilon) exclusive
+    /// </summary>
+    public class Epsilon
 	{
 		#region Static variables
 
-		private static double eps = 1e-10;
+		private const float eps = 1e-10f;
 
 		#endregion
 
 		#region Public functions
 
-		public static bool pointAboveOrOnLine( Point pt, Point left, Point right )
+		public static bool pointAboveOrOnLine( Vector2 pt, Vector2 left, Vector2 right )
 		{
-			var Ax = left.x;
-			var Ay = left.y;
-			var Bx = right.x;
-			var By = right.y;
-			var Cx = pt.x;
-			var Cy = pt.y;
+			var Ax = left.X;
+			var Ay = left.Y;
+			var Bx = right.X;
+			var By = right.Y;
+			var Cx = pt.X;
+			var Cy = pt.Y;
 
 			return ( Bx - Ax ) * ( Cy - Ay ) - ( By - Ay ) * ( Cx - Ax ) >= -eps;
 		}
 
-		public static bool pointBetween( Point pt, Point left, Point right )
+		public static bool pointBetween( Vector2 pt, Vector2 left, Vector2 right )
 		{
 			// p must be collinear with left->right
 			// returns false if p == left, p == right, or left == right
-			var d_py_ly = pt.y - left.y;
-			var d_rx_lx = right.x - left.x;
-			var d_px_lx = pt.x - left.x;
-			var d_ry_ly = right.y - left.y;
+			var d_py_ly = pt.Y - left.Y;
+			var d_rx_lx = right.X - left.X;
+			var d_px_lx = pt.X - left.X;
+			var d_ry_ly = right.Y - left.Y;
 
 			var dot = d_px_lx * d_rx_lx + d_py_ly * d_ry_ly;
 
@@ -60,46 +61,46 @@ namespace PolyBoolCS
 			return true;
 		}
 
-		public static bool pointsSameX( Point p1, Point p2 )
+		public static bool pointsSameX( Vector2 p1, Vector2 p2 )
 		{
-			return Math.Abs( p1.x - p2.x ) < eps;
+			return Math.Abs( p1.X - p2.X ) < eps;
 		}
 
-		public static bool pointsSameY( Point p1, Point p2 )
+		public static bool pointsSameY( Vector2 p1, Vector2 p2 )
 		{
-			return Math.Abs( p1.y - p2.y ) < eps;
+			return Math.Abs( p1.Y - p2.Y ) < eps;
 		}
 
-		public static bool pointsSame( Point p1, Point p2 )
+		public static bool pointsSame( Vector2 p1, Vector2 p2 )
 		{
 			return
-				Math.Abs( p1.x - p2.x ) < eps &&
-				Math.Abs( p1.y - p2.y ) < eps;
+				Math.Abs( p1.X - p2.X ) < eps &&
+				Math.Abs( p1.Y - p2.Y ) < eps;
 		}
 
-		public static int pointsCompare( Point p1, Point p2 )
+		public static int pointsCompare( Vector2 p1, Vector2 p2 )
 		{
 			// returns -1 if p1 is smaller, 1 if p2 is smaller, 0 if equal
 			if( pointsSameX( p1, p2 ) )
-				return pointsSameY( p1, p2 ) ? 0 : ( p1.y < p2.y ? -1 : 1 );
+				return pointsSameY( p1, p2 ) ? 0 : ( p1.Y < p2.Y ? -1 : 1 );
 
-			return p1.x < p2.x ? -1 : 1;
+			return p1.X < p2.X ? -1 : 1;
 		}
 
-		public static bool pointsCollinear( Point p1, Point p2, Point p3 )
+		public static bool pointsCollinear( Vector2 p1, Vector2 p2, Vector2 p3 )
 		{
 			// does pt1->pt2->pt3 make a straight line?
 			// essentially this is just checking to see if the slope(pt1->pt2) === slope(pt2->pt3)
 			// if slopes are equal, then they must be collinear, because they share pt2
-			var dx1 = p1.x - p2.x;
-			var dy1 = p1.y - p2.y;
-			var dx2 = p2.x - p3.x;
-			var dy2 = p2.y - p3.y;
+			var dx1 = p1.X - p2.X;
+			var dy1 = p1.Y - p2.Y;
+			var dx2 = p2.X - p3.X;
+			var dy2 = p2.Y - p3.Y;
 
 			return Math.Abs( dx1 * dy2 - dx2 * dy1 ) < eps;
 		}
 
-		public static bool linesIntersect( Point a0, Point a1, Point b0, Point b1, out Intersection intersection )
+		public static bool linesIntersect( Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1, out Intersection intersection )
 		{
 			// returns false if the lines are coincident (e.g., parallel or on top of each other)
 			//
@@ -120,10 +121,10 @@ namespace PolyBoolCS
 			//     1   intersection point is directly on segment's second point
 			//     2   intersection point is after segment's second point
 
-			var adx = a1.x - a0.x;
-			var ady = a1.y - a0.y;
-			var bdx = b1.x - b0.x;
-			var bdy = b1.y - b0.y;
+			var adx = a1.X - a0.X;
+			var ady = a1.Y - a0.Y;
+			var bdx = b1.X - b0.X;
+			var bdy = b1.Y - b0.Y;
 
 			var axb = adx * bdy - ady * bdx;
 			if( Math.Abs( axb ) < eps )
@@ -132,8 +133,8 @@ namespace PolyBoolCS
 				return false; // lines are coincident
 			}
 
-			var dx = a0.x - b0.x;
-			var dy = a0.y - b0.y;
+			var dx = a0.X - b0.X;
+			var dy = a0.Y - b0.Y;
 
 			var A = ( bdx * dy - bdy * dx ) / axb;
 			var B = ( adx * dy - ady * dx ) / axb;
@@ -142,10 +143,10 @@ namespace PolyBoolCS
 			{
 				alongA = 0,
 				alongB = 0,
-				pt = new Point()
+				pt = new Vector2()
 				{
-					x = a0.x + A * adx,
-					y = a0.y + A * ady
+					X = a0.X + A * adx,
+					Y = a0.Y + A * ady
 				}
 			};
 
